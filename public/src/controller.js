@@ -5,39 +5,62 @@ angular.module('MainApp')
 .controller('HomeController', function($scope){
 	$scope.message = "Hello Home!";
 })
-.controller('EmailController', function ($scope, $http) {
-    $scope.result = 'hidden'
-    $scope.resultMessage;
-    $scope.formData; //formData is an object holding the name, email, subject, and message
-    $scope.submitButtonDisabled = false;
-    $scope.submitted = false; //used so that form errors are shown only after the form has been submitted
-    $scope.submit = function(contactform) {
-        $scope.submitted = true;
-        $scope.submitButtonDisabled = true;
-        if (contactform.$valid) {
-            $http({
-                method  : 'POST',
-                url     : 'src/contact-form.php',
-                data    : $.param($scope.formData),  //param method from jQuery
-                headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  //set the headers so angular passing info as form data (not request payload)
-            }).success(function(data){
-                console.log(data);
-                if (data.success) { //success comes from the return json object
-                    $scope.submitButtonDisabled = true;
-                    $scope.resultMessage = data.message;
-                    $scope.result='bg-success';
-                } else {
-                    $scope.submitButtonDisabled = false;
-                    $scope.resultMessage = data.message;
-                    $scope.result='bg-danger';
-                }
-            });
-        } else {
-            $scope.submitButtonDisabled = false;
-            $scope.resultMessage = 'Failed <img src="http://www.chaosm.net/blog/wp-includes/images/smilies/icon_sad.gif" alt=":(" class="wp-smiley">  Please fill out all the fields.';
-            $scope.result='bg-danger';
-        }
-    }
+.controller('EmailController', function($scope,$http) {
+        $scope.resultMessage;
+        $scope.fullname="";
+        $scope.email="";
+        $scope.message=""
+
+        $scope.sendEmail =function(){
+            console.log("about to email - before mailJSON");
+            var mailJSON ={
+                "key": "rgXsCj0PROJbEHOk_7uHrA",
+                "message": {
+                  "html": ""+$scope.message,
+                  "text": ""+$scope.message,
+                  "subject": "*** Web Dev message from " + $scope.fullname + " ***",
+                  "from_email": $scope.email,
+                  "from_name": "" + $scope.fullname,
+                  "to": [
+                    {
+                      "email": "ericapeharda@gmail.com",
+                      "name": "EP Web Dev",
+                      "type": "to"
+                    }
+                  ],
+                  "important": false,
+                  "track_opens": null,
+                  "track_clicks": null,
+                  "auto_text": null,
+                  "auto_html": null,
+                  "inline_css": null,
+                  "url_strip_qs": null,
+                  "preserve_recipients": null,
+                  "view_content_link": null,
+                  "tracking_domain": null,
+                  "signing_domain": null,
+                  "return_path_domain": null
+                },
+                "async": false,
+                "ip_pool": "Main Pool"
+            };
+            var apiURL = "https://mandrillapp.com/api/1.0/messages/send.json";
+            $http.post(apiURL, mailJSON).
+              success(function(data, status, headers, config) {                
+                $scope.form={};
+                console.log('successful email send.');
+                console.log('status: ' + status);
+                console.log('data: ' + data);
+                console.log('headers: ' + headers);
+                console.log('config: ' + config);
+                $scope.myForm.$setUntouched();
+                $scope.resultMessage="Thank you!  You message was successfully sent";
+              }).error(function(data, status, headers, config) {
+                console.log('error sending email.');
+                console.log('status: ' + status);
+                $scope.resultMessage="Your message failed to send.  Please email ericapeharda@gmail.com";
+              });
+        };
 })
 .controller('AboutController', function($scope){
 	$scope.message = "Hello About!"

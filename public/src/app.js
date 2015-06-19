@@ -17,6 +17,7 @@ angular.module('MainApp',['ngRoute', 'ngResource'])
 			templateUrl: 'views/projects.html',
 			controller: 'ProjectController'
 		})	
+		.otherwise({ redirectTo: '/' });
 		//this is incase we need to add the #!
 	$locationProvider.html5Mode(
 	true);
